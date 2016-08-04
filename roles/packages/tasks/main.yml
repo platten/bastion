@@ -1,0 +1,85 @@
+---
+   - name: Enable testing repo
+     lineinfile: dest=/etc/apk/repositories regexp="^#http://dl-4.alpinelinux.org/alpine/edge/testing" line="@testing http://dl-4.alpinelinux.org/alpine/edge/testing" state=present
+     register: repo_modified
+
+   - name: Update packages
+     apk: update_cache=yes
+     register: updated
+     when: repo_modified|succeeded
+
+   - name: Install sudo
+     apk: name=sudo state=present
+     when: updated|succeeded
+
+   - name: Install coreutils
+     apk: name=coreutils state=present
+     when: updated|succeeded
+
+   - name: Install pinned version of shadow
+     apk: name=shadow@testing state=present
+     when: updated|succeeded
+     register: shadow_installed
+
+   - name: Copy the usermod PAM file
+     copy: src=pamfile dest=/etc/pam.d/usermod
+     when: shadow_installed|succeeded
+
+   - name: Copy the useradd PAM file
+     copy: src=pamfile dest=/etc/pam.d/useradd
+     when: shadow_installed|succeeded
+  
+   - name: Install grep
+     apk: name=grep state=present
+     when: updated|succeeded
+
+   - name: Install bash
+     apk: name=bash state=present
+     when: updated|succeeded
+
+   - name: Install Tmux
+     apk: name=tmux state=present
+     when: updated|succeeded
+
+   - name: Install vim
+     apk: name=vim state=present
+     when: updated|succeeded
+
+   - name: Install htop
+     apk: name=htop state=present
+     when: updated|succeeded
+
+   - name: Install iftop
+     apk: name=iftop state=present
+     when: updated|succeeded
+
+   - name: Install the_silver_searcher
+     apk: name=the_silver_searcher state=present
+     when: updated|succeeded
+
+   - name: Install nmap
+     apk: name=nmap state=present
+     when: updated|succeeded
+
+   - name: Install git
+     apk: name=git state=present
+     when: updated|succeeded
+
+   - name: Install curl
+     apk: name=curl state=present
+     when: updated|succeeded
+
+   - name: Install wget
+     apk: name=wget state=present
+     when: updated|succeeded
+
+   - name: Install rsync
+     apk: name=rsync state=present
+     when: updated|succeeded
+
+   - name: Install python
+     apk: name=python state=present
+     when: updated|succeeded
+
+   - name: Install sshguard
+     apk: name=sshguard state=present

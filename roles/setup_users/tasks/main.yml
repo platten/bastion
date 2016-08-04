@@ -1,0 +1,31 @@
+---
+  - name: Create wheel group
+    group: name=wheel state=present
+    register: wheel_exists
+
+  - name: Create nobody group
+    group: name=nobody state=present
+    register: nobody_exists
+  
+  - name: Get nobody GID
+    command: bash -c '/usr/bin/grep nobody /etc/group | cut '"-d:"' -f 3'
+    changed_when: false
+    register: gid
+    when: nobody_exists|succeeded
+
+  - name: Ensure default group is nobody
+    lineinfile:
+      dest=/etc/default/useradd
+      regexp=^GROUP=
+      line=GROUP={{ gid.stdout_lines.0 }}
+    register: default_group
+    when: nobody_exists|succeeded
+  
+  - name: Ensure skel directory exists
+    file: path=/etc/skel owner=root group=root mode=u=rw,g=r,o=r state=directory
+    register: skel_exists
+
+  - name: Create users
+    user: name={{ item.key }} comment="{{ item.value.name }}" createhome=yes home=/home/{{ item.key }} shell={{ item.value.shell }} groups=wheel group=nobody state=present
+    with_dict: "{{ users }}"
+    when: wheel_exists|succeeded and default_group|succeeded and skel_exists|succeeded

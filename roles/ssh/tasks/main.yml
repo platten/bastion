@@ -1,0 +1,15 @@
+---
+   - name: Ensure ssh is latest
+     apk: name=openssh state=latest
+     register: sshd_updated
+
+   - name: ensure sshd is running (and enable it at boot)
+     service: name=sshd state=started enabled=yes
+     register: sshd_running
+     when: sshd_updated|succeeded
+
+   - name: Copy the sshd config file
+     copy: src=sshd_config dest=/etc/ssh/sshd_config
+     when: sshd_running|succeeded
+     notify:
+        - restart sshd

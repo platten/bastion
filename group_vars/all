@@ -1,0 +1,6 @@
+---
+timestamp: $PIPE(date +%Y%m%d%H%M%S)
+users:
+  paul:
+    name: Paul
+    shell: /bin/zsh
